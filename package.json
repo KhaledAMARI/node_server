@@ -4,7 +4,7 @@
   "description": "Courier plateform",
   "main": "app.js",
   "scripts": {
-    "dev": "nodemon server/app.js"
+    "dev": "nodemon server.js"
   },
   "author": "Khaled AMARI",
   "license": "MIT",
