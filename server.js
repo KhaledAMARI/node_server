@@ -3,7 +3,7 @@ require('express-async-errors');
 const express = require("express");
 const cors = require('cors');
 
-const users = require("./routes/user");
+const userRoutes = require("./routes/user");
 const connectDB = require("./config/db");
 const notFound = require('./Middlewares/not-found');
 const port = process.env.PORT || 3000;
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cors());
 
 //routes
-app.use("/api/v1/users", users);
+app.use("/api/v1/users", userRoutes);
 app.use(notFound);
 
 

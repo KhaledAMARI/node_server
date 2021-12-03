@@ -55,7 +55,7 @@ const register = async (req, res) => {
 
   res
     .status(200)
-    .json({ message: `Congrats ${user.name} your accunt is created.`, token });
+    .json({ message: `Congrats ${user.name} your account is created.`, token });
 };
 
 const confirmMail = (req, res) => {
@@ -78,13 +78,8 @@ const login = async (req, res) => {
   res.status(200).json({ message: "login Success" });
 };
 
-const logout = (req, res) => {
-  req.logout();
-  res.status(200).json({ message: "user logges out" });
-};
-
 const userHome = (req, res) => {
-  res.send(`<h1>Welcome ${req.user.name} Hello From Users API Home</h1>`);
+  res.status(200).json({user: req.user});
 };
 
-module.exports = { userHome, register, confirmMail, login, logout };
+module.exports = { userHome, register, confirmMail, login };
