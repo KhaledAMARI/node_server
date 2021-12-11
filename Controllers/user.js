@@ -1,66 +1,38 @@
-require("dotenv").config();
 const bcrypt = require("bcrypt");
-const nodemailer = require("nodemailer");
-const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
 const userModel = require("../Models/users");
-
-const emailConfirmation = async (email, htmlOutput) => {
-  try {
-      // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-      host: "smtp-mail.outlook.com",
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.USER,
-        pass: process.env.SECRET,
-      },
-      tls: {
-        rejectUnauthorized: false
-      },
-    });
-
-    // send mail with defined transport object
-    let info = await transporter.sendMail({
-      from: process.env.USER, // sender address
-      to: email, // list of receivers
-      subject: "Mail Confirmation", // Subject line
-      html: htmlOutput, // html body
-    });
-    console.log(`mail sended ${info.messageId}`);
-  } catch (error) {
-    console.log(error);
-  };
-};
+const { jwtSignUser, confirmationEmail, confirmationEmailToken } = require("../utils/utils.js");
 
 const register = async (req, res) => {
   let newUser = req.body;
   if (!newUser || !newUser.email || !newUser.password) {
-    return res.status(404).json({ error: "Please provide a user data" });
+    return res.status(400).json({ error: "Please provide a user data" });
   };
-  const salt = 10;
-  newUser.password = await bcrypt.hash(newUser.password, salt);
+  const SALT_FACTOR = 10;
+  newUser.password = await bcrypt
+    .genSalt(SALT_FACTOR)
+    .then((salt, err) =>
+      err ? console.log(err) : bcrypt.hash(newUser.password, salt)
+    );
   const user = await userModel.create(newUser);
-  const token = jwt.sign({id: user._id, name: user.name}, process.env.JWT_SECRET, { expiresIn: '1h'});
-  // const htmlOutput = `<div>
-  //                       <h1> Hello </h1>
-  //                       <p>
-  //                         Thanks for your registration in our plateforme.
-  //                         Please click on that link to confirm your email address
-  //                       </p>
-  //                       <a href=`${req.host}/api/v1/users/confirm_email?token=${token}`>Confirmation Link</a>
-  //                     </div>`;
-
-  // await emailConfirmation(newUser.email, htmlOutput);
-
+  const confirmation_Token = confirmationEmailToken();
+  const plugin = require("../utils/confirmation_mail_templates/confirmation_mail_plugin");
+  let bitmap = fs.readFileSync('./assets/images/coursier.png');
+  let logo = bitmap.toString('base64');
+  const html = plugin.template(logo, confirmation_Token);
+  await confirmationEmail(newUser.email, html);
   res
     .status(200)
-    .json({ message: `Congrats ${user.name} your account is created.`, token });
+    .json({
+      message: `Congrats ${user.name} your account is created.`,
+      registerToken,
+    });
 };
 
 const confirmMail = (req, res) => {
   // let user = userModel.findOne({});
-  res.send('<h1>Great ! Your mail is now confirmed you can log in </h1>');
+  res.send("<h1>Great ! Your mail is now confirmed you can log in </h1>");
 };
 
 const login = async (req, res) => {
@@ -70,16 +42,17 @@ const login = async (req, res) => {
   const user = await userModel.findOne({ email: req.body.email });
   if (!user) {
     return res.status(404).json({ error: "User Not Found" });
-  };
+  }
   const isValidPWD = await bcrypt.compare(req.body.password, user.password);
   if (!isValidPWD) {
     return res.status(401).json({ error: "Invalid password" });
-  };
-  res.status(200).json({ message: "login Success" });
+  }
+  const loginToken = await jwtSignUser(user._id, user.name);
+  res.status(200).json({ message: `${user.name}logged in`, loginToken });
 };
 
 const userHome = (req, res) => {
-  res.status(200).json({user: req.user});
+  res.status(200).json({ user: req.user });
 };
 
 module.exports = { userHome, register, confirmMail, login };
