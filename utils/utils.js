@@ -34,7 +34,7 @@ const confirmationEmail = async (email, html) => {
       subject: "Mail Confirmation", // Subject line
       html: html, // html body
     });
-    console.log(`mail sended from ${info.enveloppe.from}, to: <${info.enveloppe.to}> `);
+    console.log(`mail sended from ${info.envelope.from}, to: <${info.envelope.to}> `);
   } catch (error) {
     console.log(error);
   };

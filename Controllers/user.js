@@ -15,20 +15,22 @@ const register = async (req, res) => {
     .then((salt, err) =>
       err ? console.log(err) : bcrypt.hash(newUser.password, salt)
     );
-  const user = await userModel.create(newUser);
   const confirmation_Token = confirmationEmailToken();
   const plugin = require("../utils/confirmation_mail_templates/confirmation_mail_plugin");
-  let bitmap = fs.readFileSync('./assets/images/coursier.png');
-  let logo = bitmap.toString('base64');
-  const html = plugin.template(logo, confirmation_Token);
-  await confirmationEmail(newUser.email, html);
-  res
-    .status(200)
-    .json({
+  let bitmap = fs.readFileSync("./assets/images/coursier.png");
+  let logo = bitmap.toString("base64");
+  try {
+    const html = plugin.template(logo, confirmation_Token);
+    await confirmationEmail(newUser.email, html);
+    const user = await userModel.create(newUser);
+    res.status(200).json({
       message: `Congrats ${user.name} your account is created.`,
-      registerToken,
+      confirmation_Token,
     });
-};
+  } catch (error) {
+    throw error;
+  }
+};;
 
 const confirmMail = (req, res) => {
   // let user = userModel.findOne({});
