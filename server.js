@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require('cors');
 
 const userRoutes = require("./routes/user");
+const messageRoutes = require("./routes/messages");
 const connectDB = require("./config/db");
 const notFound = require('./Middlewares/not-found');
 const port = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use(cors());
 
 //routes
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/messages", messageRoutes);
 app.use(notFound);
 
 
