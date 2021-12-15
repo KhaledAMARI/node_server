@@ -1,8 +1,8 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const userModel = require("../Models/users");
-const { jwtSignUser, confirmationEmail, confirmationEmailToken } = require("../utils/utils.js");
+const userModel = require('../Models/users');
+const { jwtSignUser, confirmationEmail, confirmationEmailToken } = require('../utils/utils.js');
 
 const register = async (req, res) => {
   let newUser = req.body;
@@ -23,18 +23,24 @@ const register = async (req, res) => {
     const html = plugin.template(logo, confirmation_Token);
     await confirmationEmail(newUser.email, html);
     const user = await userModel.create(newUser);
-    res.status(200).json({
+    res.status(201).json({
       message: `Congrats ${user.name} your account is created.`,
       confirmation_Token,
+      email: user.email
     });
   } catch (error) {
     throw error;
   }
-};;
+};
 
-const confirmMail = (req, res) => {
-  // let user = userModel.findOne({});
-  res.send("<h1>Great ! Your mail is now confirmed you can log in </h1>");
+const confirmMail = async (req, res) => {
+  let user = await userModel.findOne({ email: req.body.email });
+  if (!user) {
+    return res.status(404).json({ error: "User Not Found"});
+  };
+  user.isConfirmed = true;
+  await user.save();
+  res.status(200).json({ message: `Great ! Your mail is now confirmed you can log in ${user.name}`});
 };
 
 const login = async (req, res) => {
@@ -48,9 +54,12 @@ const login = async (req, res) => {
   const isValidPWD = await bcrypt.compare(req.body.password, user.password);
   if (!isValidPWD) {
     return res.status(401).json({ error: "Invalid password" });
-  }
+  };
+  if (!user.isConfirmed) {
+    return res.status(401).json({ error: "Please confirm your mail address!"});
+  };
   const loginToken = await jwtSignUser(user._id, user.name);
-  res.status(200).json({ message: `${user.name}logged in`, loginToken });
+  res.status(202).json({ message: `${user.name} logged in`, loginToken });
 };
 
 const userHome = (req, res) => {

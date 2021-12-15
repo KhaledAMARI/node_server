@@ -6,7 +6,7 @@ const authentificationMiddleware = require('../Middlewares/auth');
 
 router.route('/').get(authentificationMiddleware, userHome);
 router.route('/register').post(register);
-router.route('/confirm_email').get(confirmMail);
+router.route('/confirm_email').post(confirmMail);
 router.route('/login').post(authentificationMiddleware, login);
 
 module.exports = router;
