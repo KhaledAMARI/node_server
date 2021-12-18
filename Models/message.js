@@ -10,7 +10,10 @@ const messageSchemaOptions = {
 }
 
 const messageSchema = new mongooseSchema({
-  email: String,
+  user_id: {
+    type: mongoose.Types.ObjectId,
+    ref: 'User'
+  },
   code: String,
   sent_date: Date,
   expiresIn: Date

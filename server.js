@@ -24,7 +24,7 @@ app.use(cors());
 //routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', authenticateUser, userRoutes);
-app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/messages', authenticateUser, messageRoutes);
 app.use(notFound);
 
 
