@@ -1,6 +1,6 @@
 const messageModel = require("../Models/messages");
 
-const addMessage = async (req, res) => {
+const createMessage = async (req, res) => {
   const newMessage = req.body;
   if (!newMessage || !newMessage.email || !newMessage.code || !newMessage.delay) {
     return res.status(422).json({ error: "Please provide a message params" });
@@ -21,4 +21,4 @@ const getMessage = async (req, res) => {
   res.status(200).json({ message });
 };
 
-module.exports = { getMessage, addMessage };
+module.exports = { getMessage, createMessage };
