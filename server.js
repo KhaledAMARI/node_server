@@ -7,6 +7,7 @@ const userRoutes = require("./routes/user");
 const messageRoutes = require("./routes/messages");
 const authRoutes = require('./routes/authentication');
 const connectDB = require("./config/db");
+const authenticateUser = require('./Middlewares/auth');
 const notFound = require('./Middlewares/not-found');
 const port = process.env.PORT || 3000;
 
@@ -22,7 +23,7 @@ app.use(cors());
 
 //routes
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/users', authenticateUser, userRoutes);
 app.use('/api/v1/messages', messageRoutes);
 app.use(notFound);
 

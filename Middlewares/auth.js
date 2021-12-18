@@ -1,5 +1,6 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const userModel = require('../Models/user');
 
 const authentificationMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -9,8 +10,11 @@ const authentificationMiddleware = async (req, res, next) => {
   try {
     const token = authHeader.split(' ').pop();
     const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-    const { id, name } = decodedToken;
-    req.user = { id, name };
+    const user = await userModel.findById({ _id: decodedToken.userID}).select('-password -createdAt -updatedAt');
+    if (!user) {
+      return res.status(404).json({ error: 'User Not Found'});
+    };
+    req.user = user;
     next();
   } catch (error) {
     throw error;
