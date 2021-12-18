@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const fs = require('fs');
 
 const userModel = require('../Models/users');
@@ -10,11 +10,8 @@ const register = async (req, res) => {
     return res.status(400).json({ error: "Please provide a user data" });
   };
   const SALT_FACTOR = 10;
-  newUser.password = await bcrypt
-    .genSalt(SALT_FACTOR)
-    .then((salt, err) =>
-      err ? console.log(err) : bcrypt.hash(newUser.password, salt)
-    );
+  const salt = await bcrypt.genSalt(SALT_FACTOR)
+  newUser.password = await bcrypt.hash(newUser.password, salt);
   const confirmation_Token = confirmationEmailToken();
   const plugin = require("../utils/confirmation_mail_templates/confirmation_mail_plugin");
   let bitmap = fs.readFileSync("./assets/images/coursier.png");
