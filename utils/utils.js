@@ -1,17 +1,5 @@
 require('dotenv').config();
-const jwt = require('jsonwebtoken');
 const nodemailer = require("nodemailer");
-const crypto = require('crypto');
-
-const jwtSignUser = async (id, name) => {
-  const ONE_WEEK = 60 * 60 * 24 * 7;
-  const token = await jwt.sign({id, name}, process.env.JWT_SECRET, { expiresIn: ONE_WEEK});
-  return token;
-};
-
-const confirmationEmailToken = (size = 4) => {
-  return crypto.randomBytes(size).toString('hex');
-};
 
 const confirmationEmail = async (email, html) => {
   try {
@@ -40,8 +28,4 @@ const confirmationEmail = async (email, html) => {
   };
 };
 
-module.exports = {
-  jwtSignUser,
-  confirmationEmail,
-  confirmationEmailToken
-}
+module.exports = { confirmationEmail }
