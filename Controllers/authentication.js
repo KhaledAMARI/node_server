@@ -1,9 +1,7 @@
 const fs = require("fs");
 
 const userModel = require("../Models/user");
-const {
-  confirmationEmail
-} = require("../utils/utils.js");
+const { confirmationEmail } = require("../utils/utils.js");
 
 const register = async (req, res) => {
   let newUser = req.body;
@@ -32,17 +30,10 @@ const register = async (req, res) => {
 };
 
 const confirmMail = async (req, res) => {
-  let user = await userModel.findOne({ email: req.body.email });
-  if (!user) {
-    return res.status(404).json({ error: "User Not Found" });
-  }
-  user.isConfirmed = true;
-  await user.save();
-  res
-    .status(200)
-    .json({
-      message: `Great ! Your mail is now confirmed you can log in ${user.name}`,
-    });
+  await userModel.updateOne({ _id: req.user._id }, { isConfirmed: true });
+  res.status(200).json({
+    message: `Great ! Your mail is now confirmed you can log in ${req.user.name}`,
+  });
 };
 
 const login = async (req, res) => {
@@ -62,12 +53,12 @@ const login = async (req, res) => {
   }
   const token = user.jwtSignUser();
   res
-    .status(202)
-    .json({
-      message: `${user.name} logged in`,
-      user: { name: user.name },
-      token,
-    });
+  .status(202)
+  .json({
+    message: `${user.name} logged in`,
+    user: { name: user.name },
+    token
+  });
 };
 
 module.exports = { register, confirmMail, login };
