@@ -16,7 +16,8 @@ const messageSchema = new mongooseSchema({
   },
   code: String,
   sent_date: Date,
-  expiresIn: Date
+  expiresIn: Date,
+  request_type: String
 }, messageSchemaOptions);
 
 const messageModel = mongoose.model('Message', messageSchema);
