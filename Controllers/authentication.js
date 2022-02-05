@@ -39,7 +39,7 @@ const register = async (req, res) => {
 const confirmMail = async (req, res) => {
   let message = await messageModel.findOne({ user_id: req.user._id }).sort({sent_date: -1});
   if (!message) {
-    return res.status(400).json({ error: "User not registres" });
+    return res.status(400).json({ error: "User not registred" });
   }
   const { token } = req.body;
   if (!token || message.code !== token) {
@@ -143,6 +143,17 @@ const resetPWD = async (req, res) => {
   res.status(200).json({message: "The Password is updated"})
   console.log("/resetPWD");
 };
+
+const savePhoneNumber = async (req, res) => {
+  console.log("save phone");
+  const {phoneNumber} = req.body;
+  if (!phoneNumber) {
+    return res.status(400).json({error: "Please provide a phone number"});
+  };
+  await userModel.updateOne({ _id: req.user._id }, { phone: phoneNumber });
+  res.status(200).json({message: "Phone added successfully"});
+};
+
 module.exports = {
   register,
   confirmMail,
@@ -150,4 +161,5 @@ module.exports = {
   changePWDRequest,
   isConfirmationTokenValid,
   resetPWD,
+  savePhoneNumber
 };
